@@ -14,7 +14,7 @@ const subjects = createSubjects({
 
 // Konfiguracja nagłówków CORS – tutaj ustawiamy dozwoloną domenę
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://spottedsosnowiec.pl',
+  'Access-Control-Allow-Origin': 'https://safemore.pl',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
@@ -97,10 +97,7 @@ export default {
     }).fetch(request, env, ctx)
 
     // Dodaj nagłówki CORS do odpowiedzi
-    response.headers.set(
-      'Access-Control-Allow-Origin',
-      'https://spottedsosnowiec.pl',
-    )
+    response.headers.set('Access-Control-Allow-Origin', 'https://safemore.pl')
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     response.headers.set(
       'Access-Control-Allow-Headers',
