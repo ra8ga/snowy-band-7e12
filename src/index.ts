@@ -12,9 +12,9 @@ const subjects = createSubjects({
   }),
 })
 
-// Konfiguracja nagłówków CORS – ustawiamy dozwoloną domenę
+// Tymczasowa konfiguracja nagłówków CORS – przyjmujemy zapytania z dowolnego źródła
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://safemore.pl',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
