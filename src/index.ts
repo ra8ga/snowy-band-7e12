@@ -50,6 +50,7 @@ export default {
               // This is where you would email the verification code to the
               // user, e.g. using Resend:
               // https://resend.com/docs/send-with-cloudflare-workers
+              console.error('codemail: ' + code)
               console.log('codemail: ' + code)
             },
             copy: {
