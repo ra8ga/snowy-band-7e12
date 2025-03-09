@@ -12,7 +12,7 @@ const subjects = createSubjects({
   }),
 })
 
-// Konfiguracja nagłówków CORS – tutaj ustawiamy dozwoloną domenę
+// Konfiguracja nagłówków CORS – ustawiamy dozwoloną domenę
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://safemore.pl',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -23,7 +23,7 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url)
 
-    // Obsługa preflight
+    // Obsługa preflight (OPTIONS)
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
@@ -31,7 +31,7 @@ export default {
       })
     }
 
-    // Przykładowa logika demo (opcjonalna)
+    // Demo – przekierowanie dla głównej strony
     if (url.pathname === '/') {
       url.searchParams.set('redirect_uri', url.origin + '/callback')
       url.searchParams.set('client_id', 'your-client-id')
@@ -97,11 +97,17 @@ export default {
     }).fetch(request, env, ctx)
 
     // Dodaj nagłówki CORS do odpowiedzi
-    response.headers.set('Access-Control-Allow-Origin', 'https://safemore.pl')
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.set(
+      'Access-Control-Allow-Origin',
+      corsHeaders['Access-Control-Allow-Origin'],
+    )
+    response.headers.set(
+      'Access-Control-Allow-Methods',
+      corsHeaders['Access-Control-Allow-Methods'],
+    )
     response.headers.set(
       'Access-Control-Allow-Headers',
-      'Content-Type, Authorization',
+      corsHeaders['Access-Control-Allow-Headers'],
     )
     return response
   },
