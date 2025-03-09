@@ -12,11 +12,12 @@ const subjects = createSubjects({
   }),
 })
 
-// Tymczasowa konfiguracja nagłówków CORS – przyjmujemy zapytania z dowolnego źródła
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://safemore.pl',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true', // Allow credentials
+  'Access-Control-Max-Age': '20', // Cache preflight response for 24 hours
 }
 
 export default {
