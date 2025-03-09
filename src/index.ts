@@ -5,39 +5,62 @@ import { PasswordUI } from '@openauthjs/openauth/ui/password'
 import { createSubjects } from '@openauthjs/openauth/subject'
 import { object, string } from 'valibot'
 
-// This value should be shared between the OpenAuth server Worker and other
-// client Workers that you connect to it, so the types and schema validation are
-// consistent.
+// Definicja schematu subject
 const subjects = createSubjects({
   user: object({
     id: string(),
   }),
 })
 
+// Konfiguracja nagłówków CORS – tutaj ustawiamy dozwoloną domenę
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'https://spottedsosnowiec.pl',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+}
+
 export default {
-  fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    // This top section is just for demo purposes. In a real setup another
-    // application would redirect the user to this Worker to be authenticated,
-    // and after signing in or registering the user would be redirected back to
-    // the application they came from. In our demo setup there is no other
-    // application, so this Worker needs to do the initial redirect and handle
-    // the callback redirect on completion.
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url)
+
+    // Obsługa preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      })
+    }
+
+    // Przykładowa logika demo (opcjonalna)
     if (url.pathname === '/') {
       url.searchParams.set('redirect_uri', url.origin + '/callback')
       url.searchParams.set('client_id', 'your-client-id')
       url.searchParams.set('response_type', 'code')
       url.pathname = '/authorize'
-      return Response.redirect(url.toString())
-    } else if (url.pathname === '/callback') {
-      return Response.json({
-        message: 'OAuth flow complete!',
-        params: Object.fromEntries(url.searchParams.entries()),
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: url.toString(),
+          ...corsHeaders,
+        },
       })
+    } else if (url.pathname === '/callback') {
+      return new Response(
+        JSON.stringify({
+          message: 'OAuth flow complete!',
+          params: Object.fromEntries(url.searchParams.entries()),
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        },
+      )
     }
 
-    // The real OpenAuth server code starts here:
-    return issuer({
+    // Realny kod OpenAuth:
+    const response = await issuer({
       storage: CloudflareStorage({
         namespace: env.AUTH_STORAGE,
       }),
@@ -45,11 +68,8 @@ export default {
       providers: {
         password: PasswordProvider(
           PasswordUI({
-            // eslint-disable-next-line @typescript-eslint/require-await
+            // Funkcja wysyłająca kod – w praktyce wyślij maila z kodem weryfikacyjnym
             sendCode: async (email, code) => {
-              // This is where you would email the verification code to the
-              // user, e.g. using Resend:
-              // https://resend.com/docs/send-with-cloudflare-workers
               console.error('codemail: ' + code)
               console.log('codemail: ' + code)
             },
@@ -75,6 +95,18 @@ export default {
         })
       },
     }).fetch(request, env, ctx)
+
+    // Dodaj nagłówki CORS do odpowiedzi
+    response.headers.set(
+      'Access-Control-Allow-Origin',
+      'https://spottedsosnowiec.pl',
+    )
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization',
+    )
+    return response
   },
 } satisfies ExportedHandler<Env>
 
